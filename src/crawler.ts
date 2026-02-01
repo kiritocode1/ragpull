@@ -21,7 +21,7 @@ export function chunkText(text: string, chunkSize: number = 1000, overlap: numbe
   return chunks;
 }
 
-export async function crawlAndIndex(url: string, apiKey: string) {
+export async function crawlAndIndex(url: string) {
   console.log(`Crawling ${url}...`);
   vectorStore.clear(); // Clear previous crawl for this demo
 
@@ -46,7 +46,8 @@ export async function crawlAndIndex(url: string, apiKey: string) {
   console.log(`Generated ${chunks.length} chunks.`);
 
   // 5. Embed & Store
-  // const openai = new OpenAI({ apiKey }); // Not needed
+  // Local embedding used
+
 
   // Process in batches
   let processedCount = 0;

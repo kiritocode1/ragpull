@@ -5,12 +5,12 @@ import { chunkText } from "./crawler";
 import { generateEmbedding } from "./embeddings";
 import { vectorStore } from "./vector_store";
 
-export async function ingestDocs(apiKey: string) {
+export async function ingestDocs() {
   const docsDir = join(process.cwd(), "docs");
   
   try {
     const files = await readdir(docsDir);
-    // const openai = new OpenAI({ apiKey }); // Not needed
+    // Local embedding used
     let totalChunks = 0;
 
     for (const file of files) {

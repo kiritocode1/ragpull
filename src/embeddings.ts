@@ -5,7 +5,8 @@ let extractor: any = null;
 
 export async function generateEmbedding(text: string): Promise<number[]> {
   if (!extractor) {
-    console.log("Initializing local embedding model (Xenova/all-MiniLM-L6-v2)...");
+    console.log("DEBUG: Initializing local embedding model (Xenova)...");
+    console.log("DEBUG: If you see this, we are strictly local.");
     // downloading and loading the model locally
     extractor = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
   }

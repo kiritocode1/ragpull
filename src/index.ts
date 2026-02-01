@@ -13,13 +13,16 @@ const app = new Elysia()
   .get("/", () => Bun.file("public/index.html"))
   .post("/api/crawl", async ({ body, set }) => {
     try {
-      const { url, apiKey } = body as { url: string; apiKey: string };
-      if (!url || !apiKey) {
+      const reqBody = body as { url: string; apiKey?: string };
+      const url = reqBody.url;
+      // API Key not used for crawling (local embeddings)
+      
+      if (!url) {
         set.status = 400;
-        return { error: "Missing URL or API Key" };
+        return { error: "Missing URL" };
       }
       
-      const result = await crawlAndIndex(url, apiKey);
+      const result = await crawlAndIndex(url);
       return result;
     } catch (e: any) {
       set.status = 500;
@@ -28,13 +31,10 @@ const app = new Elysia()
   })
   .post("/api/ingest", async ({ body, set }) => {
     try {
-        const { apiKey } = body as { apiKey: string };
-        if (!apiKey) {
-            set.status = 400;
-            return { error: "Missing API Key" };
-        }
+        // const reqBody = body as { apiKey?: string }; // Not needed
+        // API Key not used for ingestion
         
-        const result = await ingestDocs(apiKey);
+        const result = await ingestDocs();
         return result;
     } catch (e: any) {
         set.status = 500;
@@ -43,7 +43,10 @@ const app = new Elysia()
   })
   .post("/api/chat", async ({ body, set }) => {
     try {
-      const { query, apiKey } = body as { query: string; apiKey: string };
+      const reqBody = body as { query: string; apiKey?: string };
+      const query = reqBody.query;
+      const apiKey = reqBody.apiKey || Bun.env.GROQ_API_KEY || "";
+
       if (!query || !apiKey) {
         set.status = 400;
         return { error: "Missing query or API Key" };
