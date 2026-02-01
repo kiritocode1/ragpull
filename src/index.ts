@@ -5,6 +5,7 @@ import { html } from "@elysiajs/html";
 // Placeholder imports for services (we will implement these next)
 import { crawlAndIndex } from "./crawler";
 import { generateAnswer } from "./rag";
+import { ingestDocs } from "./loader";
 
 const app = new Elysia()
   .use(staticPlugin())
@@ -23,6 +24,21 @@ const app = new Elysia()
     } catch (e: any) {
       set.status = 500;
       return { error: e.message };
+    }
+  })
+  .post("/api/ingest", async ({ body, set }) => {
+    try {
+        const { apiKey } = body as { apiKey: string };
+        if (!apiKey) {
+            set.status = 400;
+            return { error: "Missing API Key" };
+        }
+        
+        const result = await ingestDocs(apiKey);
+        return result;
+    } catch (e: any) {
+        set.status = 500;
+        return { error: e.message };
     }
   })
   .post("/api/chat", async ({ body, set }) => {

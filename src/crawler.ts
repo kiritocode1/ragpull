@@ -5,8 +5,10 @@ import { vectorStore } from "./vector_store";
 
 const turndownService = new TurndownService();
 
+import { generateEmbedding } from "./embeddings";
+
 // Helper to chunk text
-function chunkText(text: string, chunkSize: number = 1000, overlap: number = 200): string[] {
+export function chunkText(text: string, chunkSize: number = 1000, overlap: number = 200): string[] {
   const chunks: string[] = [];
   let start = 0;
   
@@ -53,29 +55,19 @@ export async function crawlAndIndex(url: string, apiKey: string) {
   for (const chunk of chunks) {
     if (!chunk.trim()) continue;
 
-    const embeddingParams = {
-      model: "text-embedding-3-small",
-      input: chunk,
-    };
-    
-    // Note: OpenAI embeddings usually return data[0].embedding
-    const embeddingResponse = await openai.embeddings.create(embeddingParams);
-    const firstEmbedding = embeddingResponse.data[0];
-    
-    if (!firstEmbedding) {
-      console.warn(`No embedding returned for chunk: "${chunk.substring(0, 20)}..."`);
-      continue;
+    try {
+        const vector = await generateEmbedding(chunk, openai);
+
+        vectorStore.addDocument({
+        id: crypto.randomUUID(),
+        content: chunk,
+        vector: vector,
+        metadata: { source: url }
+        });
+        processedCount++;
+    } catch (e) {
+        console.warn(`Failed to embed chunk: ${e}`);
     }
-
-    const vector = firstEmbedding.embedding;
-
-    vectorStore.addDocument({
-      id: crypto.randomUUID(),
-      content: chunk,
-      vector: vector,
-      metadata: { source: url }
-    });
-    processedCount++;
   }
 
   return { success: true, chunks: processedCount, message: "Crawling completed successfully" };

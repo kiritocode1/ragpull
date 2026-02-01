@@ -347,6 +347,12 @@
           <button id="crawlBtn" class="btn-primary">
             <span id="crawlBtnText">Start Crawling</span>
           </button>
+          
+          <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+             <button id="ingestBtn" class="btn-primary" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <span id="ingestBtnText">Ingest Local Docs</span>
+             </button>
+          </div>
         </div>
 
         <div class="status-log" id="statusLog">
@@ -393,12 +399,45 @@
       const messages = document.getElementById("messages");
       let isCrawling = false;
 
+      const ingestBtn = document.getElementById("ingestBtn");
+
       function log(msg, type = "info") {
         const div = document.createElement("div");
         div.className = `log-entry log-${type}`;
         div.textContent = `> ${msg}`;
         statusLog.appendChild(div);
         statusLog.scrollTop = statusLog.scrollHeight;
+      }
+
+      async function startIngest() {
+        const apiKey = document.getElementById("apiKey").value;
+        if (!apiKey) {
+           log("Please provide API Key", "error");
+           return;
+        }
+
+        ingestBtn.disabled = true;
+        ingestBtn.querySelector("span").textContent = "Ingesting...";
+        log("Starting local ingestion...", "info");
+
+        try {
+            const res = await fetch("/api/ingest", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ apiKey }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Ingestion failed");
+
+            log(`Success! Ingested ${data.count} chunks.`, "success");
+            queryInput.disabled = false;
+            sendBtn.disabled = false;
+        } catch (err) {
+            log(`Error: ${err.message}`, "error");
+        } finally {
+            ingestBtn.disabled = false;
+            ingestBtn.querySelector("span").textContent = "Ingest Local Docs";
+        }
       }
 
       async function startCrawl() {
@@ -509,6 +548,7 @@
       }
 
       crawlBtn.onclick = startCrawl;
+      ingestBtn.onclick = startIngest;
       sendBtn.onclick = sendMessage;
       queryInput.onkeypress = (e) => {
         if (e.key === "Enter" && !sendBtn.disabled) sendMessage();

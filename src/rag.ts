@@ -1,3 +1,4 @@
+import { generateEmbedding } from "./embeddings";
 import OpenAI from "openai";
 import { vectorStore } from "./vector_store";
 
@@ -5,15 +6,7 @@ export async function generateAnswer(query: string, apiKey: string) {
   const openai = new OpenAI({ apiKey });
 
   // 1. Embed Query
-  const embeddingResponse = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: query,
-  });
-  const data = embeddingResponse.data[0];
-  if (!data) {
-    throw new Error("Failed to generate embedding");
-  }
-  const queryVector = data.embedding;
+  const queryVector = await generateEmbedding(query, openai);
 
   // 2. Retrieve Documents
   const relevantDocs = vectorStore.search(queryVector, 5); // Retrieve top 5
