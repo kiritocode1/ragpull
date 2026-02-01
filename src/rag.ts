@@ -9,7 +9,11 @@ export async function generateAnswer(query: string, apiKey: string) {
     model: "text-embedding-3-small",
     input: query,
   });
-  const queryVector = embeddingResponse.data[0].embedding;
+  const data = embeddingResponse.data[0];
+  if (!data) {
+    throw new Error("Failed to generate embedding");
+  }
+  const queryVector = data.embedding;
 
   // 2. Retrieve Documents
   const relevantDocs = vectorStore.search(queryVector, 5); // Retrieve top 5
@@ -39,7 +43,7 @@ export async function generateAnswer(query: string, apiKey: string) {
     ],
   });
 
-  const answer = completion.choices[0].message.content || "No answer generated.";
+  const answer = completion.choices[0]?.message?.content || "No answer generated.";
   const sources = [...new Set(relevantDocs.map(d => d.metadata.source))]; // Unique sources
 
   return { answer, sources };

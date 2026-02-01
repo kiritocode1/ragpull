@@ -60,7 +60,14 @@ export async function crawlAndIndex(url: string, apiKey: string) {
     
     // Note: OpenAI embeddings usually return data[0].embedding
     const embeddingResponse = await openai.embeddings.create(embeddingParams);
-    const vector = embeddingResponse.data[0].embedding;
+    const firstEmbedding = embeddingResponse.data[0];
+    
+    if (!firstEmbedding) {
+      console.warn(`No embedding returned for chunk: "${chunk.substring(0, 20)}..."`);
+      continue;
+    }
+
+    const vector = firstEmbedding.embedding;
 
     vectorStore.addDocument({
       id: crypto.randomUUID(),
