@@ -1,15 +1,18 @@
-import OpenAI from "openai";
+import { pipeline } from "@xenova/transformers";
 
-export async function generateEmbedding(text: string, client: OpenAI): Promise<number[]> {
-  const response = await client.embeddings.create({
-    model: "text-embedding-3-small",
-    input: text,
-  });
+// Singleton to hold the pipeline
+let extractor: any = null;
 
-  const data = response.data[0];
-  if (!data) {
-    throw new Error("Failed to generate embedding");
+export async function generateEmbedding(text: string): Promise<number[]> {
+  if (!extractor) {
+    console.log("Initializing local embedding model (Xenova/all-MiniLM-L6-v2)...");
+    // downloading and loading the model locally
+    extractor = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
   }
-
-  return data.embedding;
+  
+  // pooling: 'mean' and normalize: true are standard for sentence embeddings
+  const output = await extractor(text, { pooling: "mean", normalize: true });
+  
+  // output.data is a Float32Array
+  return Array.from(output.data);
 }

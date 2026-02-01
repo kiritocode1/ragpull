@@ -1,6 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import OpenAI from "openai";
+// import OpenAI from "openai"; // Not needed
 import { chunkText } from "./crawler";
 import { generateEmbedding } from "./embeddings";
 import { vectorStore } from "./vector_store";
@@ -10,7 +10,7 @@ export async function ingestDocs(apiKey: string) {
   
   try {
     const files = await readdir(docsDir);
-    const openai = new OpenAI({ apiKey });
+    // const openai = new OpenAI({ apiKey }); // Not needed
     let totalChunks = 0;
 
     for (const file of files) {
@@ -26,7 +26,8 @@ export async function ingestDocs(apiKey: string) {
         if (!chunk.trim()) continue;
 
         try {
-            const vector = await generateEmbedding(chunk, openai);
+            // Local embedding
+            const vector = await generateEmbedding(chunk);
             
             vectorStore.addDocument({
               id: crypto.randomUUID(),

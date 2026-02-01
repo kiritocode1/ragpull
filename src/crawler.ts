@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 import TurndownService from "turndown";
-import OpenAI from "openai";
+// import OpenAI from "openai"; // Not needed for local embeddings
 import { vectorStore } from "./vector_store";
 
 const turndownService = new TurndownService();
@@ -46,17 +46,16 @@ export async function crawlAndIndex(url: string, apiKey: string) {
   console.log(`Generated ${chunks.length} chunks.`);
 
   // 5. Embed & Store
-  const openai = new OpenAI({ apiKey });
+  // const openai = new OpenAI({ apiKey }); // Not needed
 
-  // Process in batches to avoid rate limits if necessary, 
-  // but for simplicity we'll map all (or small batches)
+  // Process in batches
   let processedCount = 0;
 
   for (const chunk of chunks) {
     if (!chunk.trim()) continue;
 
     try {
-        const vector = await generateEmbedding(chunk, openai);
+        const vector = await generateEmbedding(chunk); // No client passed
 
         vectorStore.addDocument({
         id: crypto.randomUUID(),

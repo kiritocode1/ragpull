@@ -3,10 +3,14 @@ import OpenAI from "openai";
 import { vectorStore } from "./vector_store";
 
 export async function generateAnswer(query: string, apiKey: string) {
-  const openai = new OpenAI({ apiKey });
+  // Use Groq Configuration
+  const openai = new OpenAI({ 
+      apiKey, 
+      baseURL: "https://api.groq.com/openai/v1" 
+  });
 
-  // 1. Embed Query
-  const queryVector = await generateEmbedding(query, openai);
+  // 1. Embed Query (Local)
+  const queryVector = await generateEmbedding(query);
 
   // 2. Retrieve Documents
   const relevantDocs = vectorStore.search(queryVector, 5); // Retrieve top 5
@@ -29,7 +33,7 @@ export async function generateAnswer(query: string, apiKey: string) {
 
   // 4. Generate Answer
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "llama3-8b-8192",
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: query },

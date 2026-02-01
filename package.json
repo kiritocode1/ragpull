@@ -13,6 +13,7 @@
   "dependencies": {
     "@elysiajs/html": "^1.4.0",
     "@elysiajs/static": "^1.4.7",
+    "@xenova/transformers": "^2.17.2",
     "cheerio": "^1.2.0",
     "elysia": "^1.4.22",
     "openai": "^6.17.0",
