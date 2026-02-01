@@ -33,7 +33,7 @@ export async function generateAnswer(query: string, apiKey: string) {
 
   // 4. Generate Answer
   const completion = await openai.chat.completions.create({
-    model: "llama3-8b-8192",
+    model: "llama-3.3-70b-versatile",
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: query },
